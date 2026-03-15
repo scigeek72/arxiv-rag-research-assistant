@@ -1,0 +1,57 @@
+# ============================================================
+#  Text-to-SQL RAG System  —  Requirements  (v4)
+#  Install:  pip install -r requirements_v4.txt
+# ============================================================
+
+# ── Core paper retrieval & download ─────────────────────────
+arxiv>=1.4.0
+requests>=2.25.0
+
+# ── PDF text extraction ─────────────────────────────────────
+PyMuPDF>=1.20.0
+
+# ── LangChain framework ─────────────────────────────────────
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-huggingface>=0.0.3
+langchain-text-splitters>=0.2.0
+
+# ── OpenAI API (LLM + embeddings) ────────────────────────────
+# Used for:  OpenAI GPT-4o / gpt-4o-mini  AND  LM Studio compatibility
+openai>=1.0.0
+langchain-openai>=0.1.0          # langchain wrapper for OpenAI embeddings
+
+# ── Local embeddings ─────────────────────────────────────────
+# Includes CrossEncoder for re-ranking
+sentence-transformers>=2.7.0
+
+# ── Vector database ──────────────────────────────────────────
+chromadb>=0.5.0
+
+# ── Hybrid search (BM25) ─────────────────────────────────────
+rank-bm25>=0.2.2
+
+# ── Desktop GUI ──────────────────────────────────────────────
+PyQt6>=6.6.0          # Main desktop app  (run: python desktop_app.py)
+# Tkinter is built-in to Python — no install needed for the fallback UI
+
+# ── Gradio web interface (existing gradio_interface.py) ──────
+gradio>=4.0.0
+
+# ── Progress bars ────────────────────────────────────────────
+tqdm>=4.65.0
+
+# ── Environment variable / .env file loading ─────────────────
+python-dotenv>=1.0.0     # auto-loads .env from this or sibling projects
+
+# ── Numeric / utility ────────────────────────────────────────
+numpy>=1.24.0
+typing-extensions>=4.0.0
+
+# ── Optional: faster tokenisation for sentence-transformers ──
+# tokenizers>=0.15.0
+
+# ── Dev / testing (optional) ─────────────────────────────────
+# pytest>=7.0.0
+# black>=24.0.0
+# flake8>=6.0.0

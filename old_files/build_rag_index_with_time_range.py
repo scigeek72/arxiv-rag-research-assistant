@@ -6,7 +6,7 @@ import fitz  # PyMuPDF
 import argparse
 import datetime
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_community.docstore.document import Document # Import Document class
@@ -35,10 +35,9 @@ def parse_arguments():
     date_range = None
     if args.year:
         # If year is provided, set date range for the entire year
-        # Use UTC timezone to match arXiv's datetime objects
         date_range = {
-            'start': datetime.datetime(args.year, 1, 1, tzinfo=datetime.timezone.utc),
-            'end': datetime.datetime(args.year, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
+            'start': datetime.datetime(args.year, 1, 1),
+            'end': datetime.datetime(args.year, 12, 31, 23, 59, 59)
         }
     elif args.start_date or args.end_date:
         date_range = {}
@@ -53,8 +52,7 @@ def parse_arguments():
         # Process start_date
         if args.start_date:
             try:
-                naive_start = datetime.datetime.strptime(args.start_date, "%Y-%m-%d")
-                date_range['start'] = naive_start.replace(tzinfo=datetime.timezone.utc)
+                date_range['start'] = datetime.datetime.strptime(args.start_date, "%Y-%m-%d")
             except ValueError:
                 print(f"Error: Invalid start date format. Please use YYYY-MM-DD format.")
                 exit(1)
@@ -62,18 +60,15 @@ def parse_arguments():
             # Process end_date within the start_date block
             if args.end_date:
                 try:
-                    naive_end = datetime.datetime.strptime(args.end_date, "%Y-%m-%d")
-                    # Set to end of day
-                    naive_end = datetime.datetime(naive_end.year, naive_end.month, naive_end.day, 23, 59, 59)
-                    date_range['end'] = naive_end.replace(tzinfo=datetime.timezone.utc)
+                    date_obj = datetime.datetime.strptime(args.end_date, "%Y-%m-%d")
+                    date_range['end'] = datetime.datetime(date_obj.year, date_obj.month, date_obj.day, 23, 59, 59)
                 except ValueError:
                     print(f"Error: Invalid end date format. Please use YYYY-MM-DD format.")
                     exit(1)
             else:
                 # No end_date provided, use current date as default
                 current_date = datetime.datetime.now()
-                current_end = datetime.datetime(current_date.year, current_date.month, current_date.day, 23, 59, 59)
-                date_range['end'] = current_end.replace(tzinfo=datetime.timezone.utc)
+                date_range['end'] = datetime.datetime(current_date.year, current_date.month, current_date.day, 23, 59, 59)
                 print(f"No end date specified. Using current date ({current_date.strftime('%Y-%m-%d')}) as end date.")
     
     return args.max_papers, date_range
@@ -141,34 +136,10 @@ def search_arxiv(query, max_results=200, sort_criterion=arxiv.SortCriterion.Rele
                 include_paper = True
                 
                 if date_range:
-                    # Convert both datetimes to naive UTC for comparison
-                    # This avoids timezone-aware vs timezone-naive comparison issues
-                    published_date = result.published
-                    
-                    # Convert published_date to naive UTC
-                    if published_date.tzinfo is not None:
-                        # If timezone-aware, convert to UTC and strip timezone
-                        published_date = published_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    # If already naive, assume it's already in UTC
-                    
-                    # Convert date_range dates to naive UTC
-                    start_date = None
-                    end_date = None
-                    
-                    if 'start' in date_range:
-                        start_date = date_range['start']
-                        if start_date.tzinfo is not None:
-                            start_date = start_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    
-                    if 'end' in date_range:
-                        end_date = date_range['end']
-                        if end_date.tzinfo is not None:
-                            end_date = end_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    
-                    # Now compare naive UTC datetimes
-                    if start_date and published_date < start_date:
+                    # Check if paper is within the date range
+                    if 'start' in date_range and result.published < date_range['start']:
                         include_paper = False
-                    if end_date and published_date > end_date:
+                    if 'end' in date_range and result.published > date_range['end']:
                         include_paper = False
                 
                 if include_paper:
@@ -331,7 +302,7 @@ def create_vector_database(text_dir, persist_directory, embedding_model_name):
 
     # Initialize the embedding model
     print("Initializing embedding model...")
-    embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
+    embeddings = SentenceTransformerEmbeddings(model_name=embedding_model_name)
 
     # Create and persist the vector store
     print(f"Creating and persisting ChromaDB to '{persist_directory}'...")

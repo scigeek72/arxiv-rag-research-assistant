@@ -3,80 +3,11 @@ import requests
 import os
 import time
 import fitz  # PyMuPDF
-import argparse
-import datetime
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_community.docstore.document import Document # Import Document class
-
-# --- Command Line Argument Parsing ---
-
-def parse_arguments():
-    """Parse command line arguments for time range and paper count."""
-    parser = argparse.ArgumentParser(description='Build a RAG knowledge base from arXiv papers on Text-to-SQL.')
-    
-    # Time range arguments
-    parser.add_argument('--start-date', type=str, 
-                        help='Start date for paper search (YYYY-MM-DD format). Papers published on or after this date will be included.')
-    parser.add_argument('--end-date', type=str, 
-                        help='End date for paper search (YYYY-MM-DD format). Papers published on or before this date will be included.')
-    parser.add_argument('--year', type=int, 
-                        help='Specific year to filter papers (e.g., 2024). This is a shorthand alternative to setting start-date and end-date.')
-    
-    # Paper count argument
-    parser.add_argument('--max-papers', type=int, default=200,
-                        help='Maximum number of papers to download (default: 200)')
-    
-    args = parser.parse_args()
-    
-    # Process dates if provided
-    date_range = None
-    if args.year:
-        # If year is provided, set date range for the entire year
-        # Use UTC timezone to match arXiv's datetime objects
-        date_range = {
-            'start': datetime.datetime(args.year, 1, 1, tzinfo=datetime.timezone.utc),
-            'end': datetime.datetime(args.year, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
-        }
-    elif args.start_date or args.end_date:
-        date_range = {}
-        
-        # Check if only end_date is provided (without start_date) - this is an error
-        if args.end_date and not args.start_date:
-            print("Error: When specifying an end date (--end-date), you must also specify a start date (--start-date).")
-            print("This prevents downloading an excessive number of papers.")
-            print("Example: --start-date 2023-01-01 --end-date 2023-12-31")
-            exit(1)
-        
-        # Process start_date
-        if args.start_date:
-            try:
-                naive_start = datetime.datetime.strptime(args.start_date, "%Y-%m-%d")
-                date_range['start'] = naive_start.replace(tzinfo=datetime.timezone.utc)
-            except ValueError:
-                print(f"Error: Invalid start date format. Please use YYYY-MM-DD format.")
-                exit(1)
-                
-            # Process end_date within the start_date block
-            if args.end_date:
-                try:
-                    naive_end = datetime.datetime.strptime(args.end_date, "%Y-%m-%d")
-                    # Set to end of day
-                    naive_end = datetime.datetime(naive_end.year, naive_end.month, naive_end.day, 23, 59, 59)
-                    date_range['end'] = naive_end.replace(tzinfo=datetime.timezone.utc)
-                except ValueError:
-                    print(f"Error: Invalid end date format. Please use YYYY-MM-DD format.")
-                    exit(1)
-            else:
-                # No end_date provided, use current date as default
-                current_date = datetime.datetime.now()
-                current_end = datetime.datetime(current_date.year, current_date.month, current_date.day, 23, 59, 59)
-                date_range['end'] = current_end.replace(tzinfo=datetime.timezone.utc)
-                print(f"No end date specified. Using current date ({current_date.strftime('%Y-%m-%d')}) as end date.")
-    
-    return args.max_papers, date_range
 
 # --- Configuration ---
 
@@ -95,7 +26,7 @@ EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2" # Or 'all-mpnet-base-v2' (larger, pote
 
 # --- Function to Search arXiv by Keyword ---
 
-def search_arxiv(query, max_results=200, sort_criterion=arxiv.SortCriterion.Relevance, date_range=None):
+def search_arxiv(query, max_results=200, sort_criterion=arxiv.SortCriterion.Relevance):
     """
     Searches arXiv for papers based on a keyword query and returns a list of paper dictionaries.
 
@@ -103,20 +34,12 @@ def search_arxiv(query, max_results=200, sort_criterion=arxiv.SortCriterion.Rele
         query (str): The search query string (e.g., 'ti:"Text-to-SQL" OR abs:"Text-to-SQL"').
         max_results (int): The maximum number of search results to retrieve.
         sort_criterion (arxiv.SortCriterion): The criterion to sort the search results.
-        date_range (dict, optional): Dictionary containing 'start' and/or 'end' datetime objects to filter results.
 
     Returns:
         list: A list of dictionaries, where each dictionary contains 'id', 'title', and 'published' date.
               Returns an empty list if no results are found or an error occurs.
     """
     print(f"Searching arXiv for '{query}' with max_results={max_results}...")
-    
-    # If date range is provided, print the range
-    if date_range:
-        start_str = date_range.get('start', 'earliest').strftime("%Y-%m-%d") if isinstance(date_range.get('start', 'earliest'), datetime.datetime) else 'earliest'
-        end_str = date_range.get('end', 'latest').strftime("%Y-%m-%d") if isinstance(date_range.get('end', 'latest'), datetime.datetime) else 'latest'
-        print(f"Filtering papers from {start_str} to {end_str}")
-    
     client = arxiv.Client()
     paper_list = []
 
@@ -134,55 +57,14 @@ def search_arxiv(query, max_results=200, sort_criterion=arxiv.SortCriterion.Rele
             print("No results found for the specified query.")
         else:
             print(f"Found {len(results)} papers matching the query.")
-            
-            # Filter results by date range if provided
-            filtered_results = []
             for result in results:
-                include_paper = True
-                
-                if date_range:
-                    # Convert both datetimes to naive UTC for comparison
-                    # This avoids timezone-aware vs timezone-naive comparison issues
-                    published_date = result.published
-                    
-                    # Convert published_date to naive UTC
-                    if published_date.tzinfo is not None:
-                        # If timezone-aware, convert to UTC and strip timezone
-                        published_date = published_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    # If already naive, assume it's already in UTC
-                    
-                    # Convert date_range dates to naive UTC
-                    start_date = None
-                    end_date = None
-                    
-                    if 'start' in date_range:
-                        start_date = date_range['start']
-                        if start_date.tzinfo is not None:
-                            start_date = start_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    
-                    if 'end' in date_range:
-                        end_date = date_range['end']
-                        if end_date.tzinfo is not None:
-                            end_date = end_date.astimezone(datetime.timezone.utc).replace(tzinfo=None)
-                    
-                    # Now compare naive UTC datetimes
-                    if start_date and published_date < start_date:
-                        include_paper = False
-                    if end_date and published_date > end_date:
-                        include_paper = False
-                
-                if include_paper:
-                    filtered_results.append(result)
-                    paper_list.append({
-                        'id': result.entry_id.split('/')[-1],
-                        'title': result.title,
-                        'published': result.published
-                    })
-                    # Optional: print found papers during search
-                    # print(f"Found: {result.title} (ID: {result.entry_id.split('/')[-1]}) Published: {result.published.strftime('%Y-%m-%d')}")
-            
-            if len(filtered_results) < len(results):
-                print(f"After date filtering: {len(filtered_results)} papers remain within the specified date range.")
+                paper_list.append({
+                    'id': result.entry_id.split('/')[-1],
+                    'title': result.title,
+                    'published': result.published
+                })
+                # Optional: print found papers during search
+                # print(f"Found: {result.title} (ID: {result.entry_id.split('/')[-1]}) Published: {result.published.strftime('%Y-%m-%d')}")
 
     except Exception as e:
         print(f"An error occurred during arXiv search: {e}")
@@ -331,7 +213,7 @@ def create_vector_database(text_dir, persist_directory, embedding_model_name):
 
     # Initialize the embedding model
     print("Initializing embedding model...")
-    embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name)
+    embeddings = SentenceTransformerEmbeddings(model_name=embedding_model_name)
 
     # Create and persist the vector store
     print(f"Creating and persisting ChromaDB to '{persist_directory}'...")
@@ -367,21 +249,13 @@ def create_vector_database(text_dir, persist_directory, embedding_model_name):
 
 if __name__ == "__main__":
     print("--- Building Text-to-SQL RAG Knowledge Base ---")
-    
-    # Parse command line arguments
-    max_papers, date_range = parse_arguments()
-    
+
     # --- Step 1: Search for Papers to Get IDs ---
-    # Use a flexible query that includes multiple variants of Text-to-SQL
-    search_query = '(ti:"Text-to-SQL" OR abs:"Text-to-SQL" OR ti:"text-to-sql" OR abs:"text-to-sql" OR ' + \
-                  'ti:"NL-to-SQL" OR abs:"NL-to-SQL" OR ti:"nl-to-sql" OR abs:"nl-to-sql" OR ' + \
-                  'ti:"natural language to SQL" OR abs:"natural language to SQL" OR ' + \
-                  '(ti:text AND ti:sql) OR (abs:text AND abs:sql) OR ' + \
-                  '(ti:nl AND ti:sql) OR (abs:nl AND abs:sql))'
-    # Use the max_papers from command line
-    found_papers = search_arxiv(search_query, max_results=max_papers, 
-                               sort_criterion=arxiv.SortCriterion.Relevance,
-                               date_range=date_range)
+    # Use the flexible query that worked for you
+    search_query = '(ti:"Text-to-SQL" OR abs:"Text-to-SQL") OR (ti:Text AND ti:SQL) OR (abs:Text AND abs:SQL)'
+    # Adjust max_results to get the desired number of papers (e.g., 150 or more)
+    desired_papers_count = 200 # Set this to slightly more than 150 to get enough relevant ones
+    found_papers = search_arxiv(search_query, max_results=desired_papers_count, sort_criterion=arxiv.SortCriterion.Relevance)
 
     if not found_papers:
         print("No papers found matching the search query. Cannot proceed with download and indexing.")
@@ -408,3 +282,4 @@ if __name__ == "__main__":
 
         else:
             print("\nFailed to build the RAG knowledge base.")
+

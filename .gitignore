@@ -1,0 +1,44 @@
+# ============================================================
+#  nl2sql_RAG_app  —  .gitignore
+# ============================================================
+
+# ── Secrets — NEVER commit these ────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ── Generated data directories ───────────────────────────────
+arxiv_text_to_sql_data/
+
+# ── Python cache ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.pytest_cache/
+
+# ── Virtual environments ─────────────────────────────────────
+venv/
+.venv/
+env/
+.env/        # note: .env FILE above, .env/ DIRECTORY here
+
+# ── IDE / OS files ───────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+
+# ── Build / distribution ─────────────────────────────────────
+dist/
+build/
+*.egg-info/
+
+# ── Jupyter ──────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Logs (optional — keep if you want log history in git) ────
+# *.log
