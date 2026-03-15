@@ -219,37 +219,44 @@ EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 
 ### API Key Setup
 
-The system finds your OpenAI API key automatically — **no manual copy-paste needed** — using this priority order:
+The system finds your OpenAI API key automatically using the following priority order:
 
 ```
 1. This project's own .env file       ← highest priority
-2. ~/Dropbox/LegalApp/.env            ← auto-discovered sibling project
-3. ~/Dropbox/LegalDocs/.env           ← auto-discovered sibling project
-4. Shell environment variable         ← export OPENAI_API_KEY=sk-...
+2. Sibling project .env files         ← configurable in config.py
+3. Shell environment variable         ← lowest priority
 ```
 
-**Option A — reuse an existing project's key (zero effort)**
-If your key is already in one of the sibling `.env` files above, do nothing. It will be loaded automatically when `config.py` is imported.
-
-**Option B — create a project-specific `.env` file**
+**Option A — project-specific `.env` file (recommended)**
 ```bash
 cp .env.example .env
-# edit .env and set:  OPENAI_API_KEY=sk-...
+# Open .env and set:  OPENAI_API_KEY=sk-...
 ```
 
-**Option C — shell export**
+**Option B — reuse a key from another project**
+If your API key already lives in another project's `.env`, add that path to the `_load_dotenv()` function in `config.py`:
+```python
+# config.py  —  _load_dotenv()
+candidate_paths = [
+    _this_dir / ".env",                          # 1. this project (always first)
+    Path.home() / "my_other_project" / ".env",   # 2. add your own paths here
+]
+```
+The first path that exists and contains `OPENAI_API_KEY` wins; the rest are ignored.
+
+**Option C — shell environment variable**
 ```bash
 export OPENAI_API_KEY=sk-...
 ```
 
-To verify which source is being used:
+To verify which source was loaded at runtime:
 ```python
 from config import Config
 print(Config.get_api_key_source())
-# → "~/Dropbox/LegalApp/.env"
+# → "/path/to/the/.env/that/was/used"
 ```
 
-> 🔒 `.env` is in `.gitignore` — your key will never be accidentally committed.
+> 🔒 `.env` is listed in `.gitignore` — your key will never be accidentally committed.
 
 ---
 
