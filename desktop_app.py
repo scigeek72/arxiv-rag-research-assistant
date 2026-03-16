@@ -900,6 +900,46 @@ class ChatTab(QWidget):
         except Exception as e:
             self.main_window.set_status(f"Cache clear error: {e}")
 
+    @staticmethod
+    def _format_text(text: str) -> str:
+        """
+        Convert LLM plain-text output to readable HTML:
+          • **word**  → <b>word</b>
+          • blank line → paragraph break  (most important for readability)
+          • single \n  → <br>
+          • numbered list items get a little top margin
+        """
+        import re
+        # Escape any existing HTML special chars first (< > &) that aren't
+        # already HTML tags coming from the system prompt.
+        # We only escape bare < and > that are NOT part of a tag.
+        text = text.replace("&", "&amp;")
+        text = text.replace("<", "&lt;").replace(">", "&gt;")
+
+        # **bold** → <b>bold</b>
+        text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
+
+        # Paragraph breaks (blank line = \n\n or \r\n\r\n)
+        paragraphs = re.split(r'\n{2,}', text)
+        parts = []
+        for para in paragraphs:
+            para = para.strip()
+            if not para:
+                continue
+            # Single newlines within a paragraph → <br>
+            para = para.replace('\n', '<br>')
+            # Indent numbered list items slightly
+            para = re.sub(
+                r'^(\d+\.\s)',
+                r'<span style="display:inline-block;width:20px;"></span>\1',
+                para,
+                flags=re.MULTILINE,
+            )
+            parts.append(para)
+
+        # Join paragraphs with visible vertical space
+        return '</p><p style="margin:0 0 10px 0;">'.join(parts)
+
     def _append_message(self, role: str, text: str):
         """Append a styled message bubble to the chat display."""
         cursor = self.chat_display.textCursor()
@@ -914,17 +954,20 @@ class ChatTab(QWidget):
                 f'<span style="color:{C["text_muted"]};font-size:11px;'
                 f'font-weight:600;">You</span>'
                 f'<div style="color:{C["user_text"]};font-size:13px;'
-                f'margin-top:3px;">{text}</div></div>'
+                f'line-height:1.6;margin-top:4px;">{text}</div></div>'
             )
         elif role == "assistant":
+            formatted = self._format_text(text)
             html = (
-                f'<div style="margin:6px 40px 6px 0; padding:10px 14px; '
+                f'<div style="margin:8px 40px 8px 0; padding:12px 16px; '
                 f'background:{C["bot_bg"]}; border-radius:12px 12px 12px 4px; '
                 f'border:1px solid #BBF7D0;">'
                 f'<span style="color:{C["text_muted"]};font-size:11px;'
-                f'font-weight:600;">Assistant</span>'
+                f'font-weight:600;letter-spacing:0.3px;">Assistant</span>'
                 f'<div style="color:{C["bot_text"]};font-size:13px;'
-                f'margin-top:3px;">{text}</div></div>'
+                f'line-height:1.75;margin-top:6px;">'
+                f'<p style="margin:0 0 10px 0;">{formatted}</p>'
+                f'</div></div>'
             )
         else:   # system / info
             html = (
