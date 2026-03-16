@@ -4,6 +4,9 @@ A **generic, topic-agnostic** Retrieval-Augmented Generation (RAG) system that l
 
 The system ships pre-configured for **Text-to-SQL** papers, but switching to any other research domain (cancer biology, transformer models, climate science, quantum computing…) requires changing **just two lines** in `config.py`.
 
+![Desktop App Screenshot](docs/screenshots/desktop_app.png)
+*Desktop app running on Transformer Models papers — chat with cited sources panel on the right*
+
 ---
 
 ## Table of Contents
