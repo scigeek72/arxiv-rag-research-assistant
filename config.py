@@ -65,11 +65,11 @@ class Config:
 
     # Short display name for the research topic — used in UI labels,
     # window titles, system prompts, and log messages.
-    TOPIC_NAME: str = "Text-to-SQL"
+    TOPIC_NAME: str = "Transformer Models"
 
     # One-sentence description of the topic — used in LLM system prompts
     # so the model knows what domain it is helping with.
-    TOPIC_DESCRIPTION: str = "converting natural language to SQL database queries"
+    TOPIC_DESCRIPTION: str = "advancements and architectures in transformer-based deep learning models"
 
     # Auto-derived URL-safe slug — used to name the data directory.
     # Do NOT edit this line; it updates automatically from TOPIC_NAME.
@@ -109,7 +109,7 @@ class Config:
     #   USE_OPENAI = False  →  local LM Studio (default)
     #   USE_OPENAI = True   →  OpenAI API (requires OPENAI_API_KEY)
     # =========================================================================
-    USE_OPENAI: bool = False
+    USE_OPENAI: bool = True
 
     # --- OpenAI settings (active when USE_OPENAI = True) ---------------------
     OPENAI_API_KEY: str         = os.getenv("OPENAI_API_KEY", "")
@@ -128,7 +128,7 @@ class Config:
     #   NOTE: Changing the embedding model requires a full index rebuild:
     #         python build_rag_index_v4.py --rebuild
     # =========================================================================
-    USE_OPENAI_EMBEDDINGS: bool = False
+    USE_OPENAI_EMBEDDINGS: bool = True
 
     # Local model options (best quality → fastest):
     #   "BAAI/bge-large-en-v1.5"  ← default, best retrieval quality
@@ -165,7 +165,7 @@ class Config:
     SEMANTIC_WEIGHT: float  = 0.6
 
     # --- Cross-Encoder Re-ranking --------------------------------------------
-    USE_RERANKER: bool  = True
+    USE_RERANKER: bool  = False   # disabled: requires PyTorch>=2.4 (base env has 2.0.1)
     RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
     # --- HyDE (Hypothetical Document Embeddings) -----------------------------
@@ -198,13 +198,11 @@ class Config:
     #       '(ti:"quantum computing" OR ti:"qubit" OR abs:"quantum algorithm")'
     # =========================================================================
     SEARCH_QUERY: str = (
-        '(ti:"Text-to-SQL" OR abs:"Text-to-SQL" OR '
-        'ti:"text-to-sql" OR abs:"text-to-sql" OR '
-        'ti:"NL-to-SQL" OR abs:"NL-to-SQL" OR '
-        'ti:"nl-to-sql" OR abs:"nl-to-sql" OR '
-        'ti:"natural language to SQL" OR abs:"natural language to SQL" OR '
-        '(ti:text AND ti:sql) OR (abs:text AND abs:sql) OR '
-        '(ti:nl AND ti:sql) OR (abs:nl AND abs:sql))'
+        '(ti:"transformer" OR ti:"attention mechanism" OR '
+        'ti:"vision transformer" OR ti:"large language model" OR '
+        'ti:"self-attention" OR ti:"ViT" OR ti:"BERT" OR ti:"GPT" OR '
+        'ti:"diffusion transformer" OR ti:"multimodal transformer") AND '
+        '(abs:"transformer" OR abs:"attention" OR abs:"self-attention")'
     )
 
     # =========================================================================

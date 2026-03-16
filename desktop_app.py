@@ -43,6 +43,276 @@ except ImportError:
     PYQT_AVAILABLE = False
 
 
+# ── Colour palette (single place to change the theme) ─────────────────────
+C = {
+    "bg":          "#F0F2F5",   # main window background
+    "surface":     "#FFFFFF",   # cards / panels
+    "border":      "#CDD3DC",   # input borders
+    "text":        "#1A2332",   # primary text  (dark navy)
+    "text_muted":  "#5A6A7A",   # secondary text
+    "accent":      "#2563EB",   # blue accent  (buttons, links)
+    "accent_dark": "#1D4ED8",   # hover state
+    "accent_light":"#DBEAFE",   # light blue tint
+    "success":     "#16A34A",   # green (ready states)
+    "warning":     "#D97706",   # amber (warnings)
+    "error":       "#DC2626",   # red (errors)
+    "user_bg":     "#DBEAFE",   # user message bubble
+    "user_text":   "#1E3A5F",
+    "bot_bg":      "#DCFCE7",   # assistant message bubble
+    "bot_text":    "#14532D",
+    "sys_bg":      "#FEF9C3",   # system/info message bubble
+    "sys_text":    "#713F12",
+    "tab_active":  "#FFFFFF",
+    "tab_inactive":"#E5E9F0",
+    "status_bg":   "#1A2332",   # status bar
+    "status_text": "#E2E8F0",
+}
+
+APP_STYLESHEET = f"""
+/* ── Global ──────────────────────────────────────────────────────── */
+QMainWindow, QWidget {{
+    background: {C['bg']};
+    color: {C['text']};
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+}}
+
+/* ── Labels ──────────────────────────────────────────────────────── */
+QLabel {{
+    color: {C['text']};
+    background: transparent;
+}}
+
+/* ── Inputs ──────────────────────────────────────────────────────── */
+QLineEdit, QSpinBox, QDoubleSpinBox {{
+    color: {C['text']};
+    background: {C['surface']};
+    border: 1.5px solid {C['border']};
+    border-radius: 6px;
+    padding: 5px 8px;
+    selection-background-color: {C['accent']};
+    selection-color: white;
+}}
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {{
+    border-color: {C['accent']};
+}}
+QLineEdit::placeholder {{
+    color: {C['text_muted']};
+}}
+
+/* ── ComboBox ────────────────────────────────────────────────────── */
+QComboBox {{
+    color: {C['text']};
+    background: {C['surface']};
+    border: 1.5px solid {C['border']};
+    border-radius: 6px;
+    padding: 5px 8px;
+    min-width: 80px;
+}}
+QComboBox:focus {{ border-color: {C['accent']}; }}
+QComboBox::drop-down {{
+    border: none;
+    width: 20px;
+}}
+QComboBox::down-arrow {{
+    width: 10px;
+    height: 10px;
+}}
+QComboBox QAbstractItemView {{
+    color: {C['text']};
+    background: {C['surface']};
+    border: 1px solid {C['border']};
+    border-radius: 4px;
+    selection-background-color: {C['accent']};
+    selection-color: white;
+    outline: none;
+}}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+QPushButton {{
+    color: {C['text']};
+    background: {C['surface']};
+    border: 1.5px solid {C['border']};
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-weight: 500;
+}}
+QPushButton:hover {{
+    background: {C['accent_light']};
+    border-color: {C['accent']};
+    color: {C['accent_dark']};
+}}
+QPushButton:pressed {{
+    background: {C['accent']};
+    color: white;
+    border-color: {C['accent_dark']};
+}}
+QPushButton:disabled {{
+    color: {C['text_muted']};
+    background: {C['bg']};
+    border-color: {C['border']};
+}}
+
+/* ── Text browsers ───────────────────────────────────────────────── */
+QTextBrowser, QTextEdit {{
+    color: {C['text']};
+    background: {C['surface']};
+    border: 1.5px solid {C['border']};
+    border-radius: 6px;
+    selection-background-color: {C['accent']};
+    selection-color: white;
+}}
+
+/* ── Group boxes ─────────────────────────────────────────────────── */
+QGroupBox {{
+    color: {C['text']};
+    font-weight: bold;
+    font-size: 12px;
+    border: 1.5px solid {C['border']};
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+    color: {C['text']};
+    background: {C['bg']};
+}}
+
+/* ── Tabs ────────────────────────────────────────────────────────── */
+QTabWidget::pane {{
+    border: 1.5px solid {C['border']};
+    border-radius: 8px;
+    background: {C['surface']};
+}}
+QTabBar::tab {{
+    color: {C['text_muted']};
+    background: {C['tab_inactive']};
+    border: 1px solid {C['border']};
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 7px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 100px;
+}}
+QTabBar::tab:selected {{
+    color: {C['accent']};
+    background: {C['tab_active']};
+    font-weight: bold;
+    border-bottom: none;
+}}
+QTabBar::tab:hover:!selected {{
+    color: {C['text']};
+    background: {C['accent_light']};
+}}
+
+/* ── Check boxes ─────────────────────────────────────────────────── */
+QCheckBox {{
+    color: {C['text']};
+    spacing: 6px;
+}}
+QCheckBox::indicator {{
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid {C['border']};
+    border-radius: 4px;
+    background: {C['surface']};
+}}
+QCheckBox::indicator:checked {{
+    background: {C['accent']};
+    border-color: {C['accent']};
+}}
+
+/* ── Scroll bars ─────────────────────────────────────────────────── */
+QScrollBar:vertical {{
+    background: {C['bg']};
+    width: 10px;
+    border-radius: 5px;
+}}
+QScrollBar::handle:vertical {{
+    background: {C['border']};
+    border-radius: 5px;
+    min-height: 20px;
+}}
+QScrollBar::handle:vertical:hover {{
+    background: {C['text_muted']};
+}}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+    height: 0px;
+}}
+
+/* ── Status bar ──────────────────────────────────────────────────── */
+QStatusBar {{
+    background: {C['status_bg']};
+    color: {C['status_text']};
+    font-size: 12px;
+    padding: 3px 8px;
+}}
+QStatusBar QLabel {{
+    color: {C['status_text']};
+    background: transparent;
+}}
+
+/* ── Progress bar ────────────────────────────────────────────────── */
+QProgressBar {{
+    background: {C['bg']};
+    border: none;
+    border-radius: 2px;
+    height: 4px;
+}}
+QProgressBar::chunk {{
+    background: {C['accent']};
+    border-radius: 2px;
+}}
+
+/* ── Splitter handle ─────────────────────────────────────────────── */
+QSplitter::handle {{
+    background: {C['border']};
+    width: 2px;
+    height: 2px;
+}}
+
+/* ── Menu bar ────────────────────────────────────────────────────── */
+QMenuBar {{
+    background: {C['bg']};
+    color: {C['text']};
+    border-bottom: 1px solid {C['border']};
+    padding: 2px;
+}}
+QMenuBar::item:selected {{
+    background: {C['accent_light']};
+    color: {C['accent_dark']};
+    border-radius: 4px;
+}}
+QMenu {{
+    background: {C['surface']};
+    color: {C['text']};
+    border: 1px solid {C['border']};
+    border-radius: 6px;
+    padding: 4px;
+}}
+QMenu::item:selected {{
+    background: {C['accent_light']};
+    color: {C['accent_dark']};
+    border-radius: 4px;
+}}
+
+/* ── Dialog ──────────────────────────────────────────────────────── */
+QDialog {{
+    background: {C['bg']};
+    color: {C['text']};
+}}
+QDialogButtonBox QPushButton {{
+    min-width: 80px;
+    padding: 6px 14px;
+}}
+"""
+
+
 # ─── Settings Dialog ─────────────────────────────────────────────────────────
 
 class SettingsDialog(QDialog):
@@ -51,23 +321,25 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Settings")
-        self.setMinimumWidth(480)
+        self.setMinimumWidth(500)
         self._build_ui()
 
     def _build_ui(self):
         from config import Config
         layout = QVBoxLayout(self)
+        layout.setSpacing(10)
 
         # ── LLM Provider ──────────────────────────────────────────────────
         llm_box = QGroupBox("LLM Provider")
         llm_form = QFormLayout(llm_box)
+        llm_form.setSpacing(8)
 
-        self.chk_use_openai = QCheckBox("Use OpenAI API (instead of LM Studio)")
+        self.chk_use_openai = QCheckBox("Use OpenAI API  (instead of LM Studio)")
         self.chk_use_openai.setChecked(Config.USE_OPENAI)
         llm_form.addRow(self.chk_use_openai)
 
         self.txt_openai_key = QLineEdit(Config.OPENAI_API_KEY or "")
-        self.txt_openai_key.setPlaceholderText("sk-...")
+        self.txt_openai_key.setPlaceholderText("sk-…")
         self.txt_openai_key.setEchoMode(QLineEdit.EchoMode.Password)
         llm_form.addRow("OpenAI API Key:", self.txt_openai_key)
 
@@ -80,15 +352,15 @@ class SettingsDialog(QDialog):
 
         self.txt_lmstudio_url = QLineEdit(Config.LM_STUDIO_API_BASE)
         llm_form.addRow("LM Studio URL:", self.txt_lmstudio_url)
-
         layout.addWidget(llm_box)
 
         # ── Embeddings ────────────────────────────────────────────────────
         emb_box = QGroupBox("Embeddings")
         emb_form = QFormLayout(emb_box)
+        emb_form.setSpacing(8)
 
         self.chk_use_openai_emb = QCheckBox(
-            "Use OpenAI embeddings (text-embedding-3-small)"
+            "Use OpenAI embeddings  (text-embedding-3-small)"
         )
         self.chk_use_openai_emb.setChecked(Config.USE_OPENAI_EMBEDDINGS)
         emb_form.addRow(self.chk_use_openai_emb)
@@ -102,16 +374,16 @@ class SettingsDialog(QDialog):
         self.cmb_local_emb.setCurrentText(Config.EMBEDDING_MODEL_NAME)
         emb_form.addRow("Local Embedding Model:", self.cmb_local_emb)
 
-        warn = QLabel("⚠  Changing the embedding model requires a full index rebuild.")
+        warn = QLabel("Changing the embedding model requires a full index rebuild.")
         warn.setWordWrap(True)
-        warn.setStyleSheet("color: #e67e22; font-size: 11px;")
+        warn.setStyleSheet(f"color: {C['warning']}; font-size: 11px;")
         emb_form.addRow(warn)
-
         layout.addWidget(emb_box)
 
         # ── RAG Parameters ────────────────────────────────────────────────
         rag_box = QGroupBox("RAG Parameters")
         rag_form = QFormLayout(rag_box)
+        rag_form.setSpacing(8)
 
         self.spn_retrieval_k = QSpinBox()
         self.spn_retrieval_k.setRange(3, 30)
@@ -134,14 +406,14 @@ class SettingsDialog(QDialog):
         self.spn_max_tokens.setSingleStep(128)
         self.spn_max_tokens.setValue(Config.LLM_MAX_TOKENS)
         rag_form.addRow("Max Tokens:", self.spn_max_tokens)
-
         layout.addWidget(rag_box)
 
         # ── Feature Toggles ───────────────────────────────────────────────
         feat_box = QGroupBox("Feature Toggles")
         feat_form = QFormLayout(feat_box)
+        feat_form.setSpacing(8)
 
-        self.chk_hybrid   = QCheckBox("Hybrid Search (BM25 + Semantic)")
+        self.chk_hybrid   = QCheckBox("Hybrid Search  (BM25 + Semantic)")
         self.chk_hybrid.setChecked(Config.USE_HYBRID_SEARCH)
         feat_form.addRow(self.chk_hybrid)
 
@@ -149,7 +421,7 @@ class SettingsDialog(QDialog):
         self.chk_reranker.setChecked(Config.USE_RERANKER)
         feat_form.addRow(self.chk_reranker)
 
-        self.chk_hyde     = QCheckBox("HyDE (Hypothetical Document Embeddings)")
+        self.chk_hyde     = QCheckBox("HyDE  (Hypothetical Document Embeddings)")
         self.chk_hyde.setChecked(Config.USE_HYDE)
         feat_form.addRow(self.chk_hyde)
 
@@ -160,7 +432,6 @@ class SettingsDialog(QDialog):
         self.chk_cache    = QCheckBox("Persistent SQLite Cache")
         self.chk_cache.setChecked(Config.USE_PERSISTENT_CACHE)
         feat_form.addRow(self.chk_cache)
-
         layout.addWidget(feat_box)
 
         # ── Buttons ───────────────────────────────────────────────────────
@@ -192,13 +463,12 @@ class SettingsDialog(QDialog):
         self.accept()
 
 
-# ─── Worker Thread ────────────────────────────────────────────────────────────
+# ─── Worker Threads ───────────────────────────────────────────────────────────
 
 class QueryWorker(QThread):
     """Runs the RAG pipeline in a background thread to keep UI responsive."""
-
-    finished  = pyqtSignal(dict)   # emits full result dict
-    error     = pyqtSignal(str)    # emits error string
+    finished = pyqtSignal(dict)
+    error    = pyqtSignal(str)
 
     def __init__(self, query: str, year_filter: Optional[int], mode: str):
         super().__init__()
@@ -217,7 +487,6 @@ class QueryWorker(QThread):
 
 class InitWorker(QThread):
     """Initialises the RAG system in background on app startup."""
-
     success = pyqtSignal(str)
     failure = pyqtSignal(str)
 
@@ -243,65 +512,102 @@ class StatusTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(8)
 
         self.status_browser = QTextBrowser()
-        self.status_browser.setFont(QFont("Courier", 11))
+        self.status_browser.setFont(QFont("Menlo, Courier New, monospace", 12))
         layout.addWidget(self.status_browser)
 
-        refresh_btn = QPushButton("🔄 Refresh Status")
+        refresh_btn = QPushButton("Refresh Status")
+        refresh_btn.setFixedWidth(140)
+        refresh_btn.setStyleSheet(
+            f"QPushButton {{ background: {C['accent']}; color: white; "
+            f"border: none; border-radius: 6px; padding: 6px 14px; font-weight: bold; }}"
+            f"QPushButton:hover {{ background: {C['accent_dark']}; }}"
+        )
         refresh_btn.clicked.connect(self.refresh)
-        layout.addWidget(refresh_btn)
+        layout.addWidget(refresh_btn, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.refresh()
 
     def refresh(self):
         from config import Config
-        s = Config.get_system_status()
+        s   = Config.get_system_status()
         llm = Config.get_active_llm_info()
         emb = Config.get_active_embedding_info()
 
-        html = """<style>
-            body  { font-family: Courier New, monospace; font-size: 13px; }
-            h3    { color: #2c3e50; }
-            .key  { color: #2980b9; font-weight: bold; }
-            .val  { color: #27ae60; }
-            .warn { color: #e67e22; }
-        </style>"""
+        def badge(on: bool) -> str:
+            if on:
+                return (f'<span style="background:{C["success"]};color:white;'
+                        f'border-radius:3px;padding:1px 6px;font-size:11px;">ON</span>')
+            return (f'<span style="background:{C["border"]};color:{C["text_muted"]};'
+                    f'border-radius:3px;padding:1px 6px;font-size:11px;">OFF</span>')
 
-        def row(k, v, warn=False):
-            cls = "warn" if warn else "val"
-            return f'<tr><td class="key">{k}</td><td class="{ cls }">{v}</td></tr>'
+        def row(label: str, value: str, warn: bool = False) -> str:
+            vc = C["warning"] if warn else C["text"]
+            return (f'<tr>'
+                    f'<td style="color:{C["text_muted"]};padding:4px 12px 4px 0;'
+                    f'font-weight:600;white-space:nowrap;">{label}</td>'
+                    f'<td style="color:{vc};padding:4px 0;">{value}</td>'
+                    f'</tr>')
 
-        html += "<h3>📊 System Status</h3><table cellpadding='4'>"
-        html += row("PDFs downloaded",    s.get("pdfs_count", 0))
-        html += row("Text files",         s.get("text_files_count", 0))
         db_ok = s.get("vector_db_exists", False)
-        html += row("Vector DB",          "✅ Ready" if db_ok else "❌ Missing",
-                    warn=not db_ok)
-        html += row("DB size",            f"{s.get('vector_db_size_mb', 0)} MB")
-        html += row("Cache entries",      s.get("cache_entries", 0))
-        html += "</table>"
 
-        html += "<h3>🤖 Active LLM</h3><table cellpadding='4'>"
-        html += row("Provider", llm["provider"])
-        html += row("Model",    llm["model"])
-        html += row("API base", llm["api_base"])
-        html += "</table>"
+        html = f"""
+        <style>
+            body {{ font-family: -apple-system,"Segoe UI",sans-serif;
+                   font-size:13px; color:{C['text']}; margin:0; padding:8px; }}
+            h4   {{ color:{C['accent']}; margin:16px 0 6px 0;
+                   font-size:13px; letter-spacing:0.5px; text-transform:uppercase; }}
+            table {{ border-collapse:collapse; width:100%; }}
+        </style>
 
-        html += "<h3>🔢 Embeddings</h3><table cellpadding='4'>"
-        html += row("Provider", emb["provider"])
-        html += row("Model",    emb["model"])
-        html += "</table>"
+        <h4>System</h4>
+        <table>
+          {row("Topic",       s.get("topic","—"))}
+          {row("PDFs",        str(s.get("pdfs_count", 0)))}
+          {row("Text files",  str(s.get("text_files_count", 0)))}
+          {row("Vector DB",
+               '<span style="color:'+C['success']+'">Ready</span>' if db_ok
+               else '<span style="color:'+C['error']+'">Missing — run build script</span>',
+               warn=not db_ok)}
+          {row("DB size",     f"{s.get('vector_db_size_mb', 0)} MB")}
+          {row("Cache",       f"{s.get('cache_entries', 0)} entries")}
+        </table>
 
-        from config import Config as C
-        html += "<h3>⚙️ Feature Toggles</h3><table cellpadding='4'>"
-        html += row("Hybrid Search",  "ON ✅" if C.USE_HYBRID_SEARCH else "OFF")
-        html += row("HyDE",           "ON ✅" if C.USE_HYDE          else "OFF")
-        html += row("Re-ranking",     "ON ✅" if C.USE_RERANKER      else "OFF")
-        html += row("Multi-hop",      "ON ✅" if C.USE_MULTIHOP      else "OFF")
-        html += row("Persist Cache",  "ON ✅" if C.USE_PERSISTENT_CACHE else "OFF")
-        html += "</table>"
+        <h4>Active LLM</h4>
+        <table>
+          {row("Provider",  llm["provider"])}
+          {row("Model",     llm["model"])}
+          {row("API base",  llm["api_base"])}
+        </table>
 
+        <h4>Embeddings</h4>
+        <table>
+          {row("Provider",  emb["provider"])}
+          {row("Model",     emb["model"])}
+        </table>
+
+        <h4>Features</h4>
+        <table>
+          <tr><td style="color:{C['text_muted']};padding:4px 12px 4px 0;
+              font-weight:600;">Hybrid Search</td>
+              <td style="padding:4px 0;">{badge(Config.USE_HYBRID_SEARCH)}</td></tr>
+          <tr><td style="color:{C['text_muted']};padding:4px 12px 4px 0;
+              font-weight:600;">HyDE</td>
+              <td style="padding:4px 0;">{badge(Config.USE_HYDE)}</td></tr>
+          <tr><td style="color:{C['text_muted']};padding:4px 12px 4px 0;
+              font-weight:600;">Re-ranking</td>
+              <td style="padding:4px 0;">{badge(Config.USE_RERANKER)}</td></tr>
+          <tr><td style="color:{C['text_muted']};padding:4px 12px 4px 0;
+              font-weight:600;">Multi-hop</td>
+              <td style="padding:4px 0;">{badge(Config.USE_MULTIHOP)}</td></tr>
+          <tr><td style="color:{C['text_muted']};padding:4px 12px 4px 0;
+              font-weight:600;">Cache</td>
+              <td style="padding:4px 0;">{badge(Config.USE_PERSISTENT_CACHE)}</td></tr>
+        </table>
+        """
         self.status_browser.setHtml(html)
 
 
@@ -312,23 +618,48 @@ class SourcesPanel(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(6)
 
-        lbl = QLabel("📚 Sources")
-        lbl.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-        layout.addWidget(lbl)
+        # Header
+        header = QLabel("Sources")
+        header.setFont(QFont("-apple-system", 13, QFont.Weight.Bold))
+        header.setStyleSheet(
+            f"color: {C['text']}; padding: 6px 0 4px 2px; "
+            f"border-bottom: 2px solid {C['accent']}; margin-bottom: 4px;"
+        )
+        layout.addWidget(header)
 
         self.browser = QTextBrowser()
         self.browser.setOpenExternalLinks(True)
-        self.browser.setFont(QFont("Segoe UI", 10))
-        self.browser.setPlaceholderText("Sources will appear here after a query.")
+        self.browser.setFont(QFont("-apple-system", 12))
+        self.browser.setStyleSheet(
+            f"QTextBrowser {{ border: none; background: {C['bg']}; padding: 4px; }}"
+        )
         layout.addWidget(self.browser)
 
     def update_sources(self, sources: list):
         if not sources:
-            self.browser.setPlainText("No sources for this response.")
+            self.browser.setHtml(
+                f'<p style="color:{C["text_muted"]};font-size:12px;'
+                f'padding:8px;">No sources for this response.</p>'
+            )
             return
 
-        html = "<style>a{color:#2980b9;} .pid{font-weight:bold;} .ttl{font-style:italic;}</style>"
+        html = f"""<style>
+            body {{ font-family:-apple-system,"Segoe UI",sans-serif;
+                   font-size:12px; color:{C['text']}; margin:0; padding:4px; }}
+            .card {{ background:{C['surface']}; border:1px solid {C['border']};
+                    border-radius:8px; padding:10px 12px; margin-bottom:10px; }}
+            .pid  {{ font-weight:700; color:{C['text']}; font-size:12px; }}
+            .ttl  {{ font-style:italic; color:{C['text']}; font-size:12px;
+                    margin-top:2px; }}
+            .aut  {{ color:{C['text_muted']}; font-size:11px; margin-top:2px; }}
+            .snp  {{ color:{C['text_muted']}; font-size:11px; margin-top:6px;
+                    border-top:1px solid {C['border']}; padding-top:6px; }}
+            a     {{ color:{C['accent']}; text-decoration:none; font-size:11px; }}
+            a:hover {{ text-decoration:underline; }}
+        </style>"""
+
         seen = set()
         for src in sources:
             pid = src.get("paper_id", "?")
@@ -342,24 +673,28 @@ class SourcesPanel(QWidget):
             url = src.get("paper_url", "")
             snp = src.get("snippet", "")
 
-            html += f'<p><span class="pid">📄 {pid}'
+            html += '<div class="card">'
+            html += f'<div class="pid">{pid}'
             if yr:
-                html += f" ({yr})"
-            html += "</span>"
+                html += f' <span style="font-weight:normal;color:{C["text_muted"]}">({yr})</span>'
+            html += '</div>'
             if ttl:
-                html += f'<br><span class="ttl">{ttl[:100]}</span>'
+                html += f'<div class="ttl">{ttl[:120]}</div>'
             if aut:
-                html += f"<br><small>{aut[:100]}</small>"
+                html += f'<div class="aut">{aut[:100]}</div>'
             if url:
-                html += f'<br><a href="{url}">Open on arXiv ↗</a>'
+                html += f'<div style="margin-top:6px;"><a href="{url}">Open on arXiv &rarr;</a></div>'
             if snp:
-                html += f"<br><small style='color:#555'>{snp[:200]}…</small>"
-            html += "<hr></p>"
+                html += f'<div class="snp">{snp[:220]}&hellip;</div>'
+            html += '</div>'
 
         self.browser.setHtml(html)
 
     def clear(self):
-        self.browser.clear()
+        self.browser.setHtml(
+            f'<p style="color:{C["text_muted"]};font-size:12px;padding:8px;">'
+            f'Sources will appear here after a query.</p>'
+        )
 
 
 # ─── Chat Tab ─────────────────────────────────────────────────────────────────
@@ -371,68 +706,100 @@ class ChatTab(QWidget):
         super().__init__(parent)
         self.main_window  = main_window
         self._worker: Optional[QueryWorker] = None
-        self._history: list = []      # [(user, assistant), …]
+        self._history: list = []
         self._build_ui()
 
     def _build_ui(self):
         root = QVBoxLayout(self)
-        root.setContentsMargins(6, 6, 6, 6)
-        root.setSpacing(6)
+        root.setContentsMargins(10, 10, 10, 10)
+        root.setSpacing(8)
 
-        # ── Top controls bar ─────────────────────────────────────────────
-        ctrl_bar = QHBoxLayout()
+        # ── Toolbar ───────────────────────────────────────────────────────
+        toolbar = QFrame()
+        toolbar.setStyleSheet(
+            f"QFrame {{ background: {C['surface']}; border: 1px solid {C['border']}; "
+            f"border-radius: 8px; }}"
+        )
+        tb_layout = QHBoxLayout(toolbar)
+        tb_layout.setContentsMargins(10, 6, 10, 6)
+        tb_layout.setSpacing(10)
 
-        ctrl_bar.addWidget(QLabel("📅 Year:"))
+        # Year filter
+        year_lbl = QLabel("Year:")
+        year_lbl.setStyleSheet(f"color:{C['text_muted']};font-weight:600;font-size:12px;")
+        tb_layout.addWidget(year_lbl)
+
         self.year_combo = QComboBox()
         self.year_combo.addItems(
             ["All Years", "2025", "2024", "2023", "2022", "2021", "2020"]
         )
-        self.year_combo.setFixedWidth(110)
-        ctrl_bar.addWidget(self.year_combo)
+        self.year_combo.setFixedWidth(105)
+        self.year_combo.setToolTip("Filter papers by publication year")
+        tb_layout.addWidget(self.year_combo)
 
-        ctrl_bar.addWidget(QLabel("  🔧 Mode:"))
+        # Separator
+        sep = QLabel("|")
+        sep.setStyleSheet(f"color:{C['border']};font-size:16px;")
+        tb_layout.addWidget(sep)
+
+        # Mode selector
+        mode_lbl = QLabel("Mode:")
+        mode_lbl.setStyleSheet(f"color:{C['text_muted']};font-weight:600;font-size:12px;")
+        tb_layout.addWidget(mode_lbl)
+
         self.mode_combo = QComboBox()
         self.mode_combo.addItems(["auto", "standard", "hyde", "multihop"])
-        self.mode_combo.setFixedWidth(100)
+        self.mode_combo.setFixedWidth(105)
         self.mode_combo.setToolTip(
-            "auto     — system picks best mode\n"
-            "standard — direct semantic search\n"
-            "hyde     — hypothetical doc embedding\n"
-            "multihop — decompose → sub-queries → synthesise"
+            "auto     — system picks the best mode\n"
+            "standard — direct semantic search (fastest)\n"
+            "hyde     — hypothetical doc embedding (better recall)\n"
+            "multihop — decompose into sub-queries (best for comparisons)"
         )
-        ctrl_bar.addWidget(self.mode_combo)
+        tb_layout.addWidget(self.mode_combo)
 
-        ctrl_bar.addStretch()
+        tb_layout.addStretch()
 
-        self.clear_btn = QPushButton("🗑 Clear Chat")
-        self.clear_btn.setFixedWidth(110)
+        # Action buttons
+        self.clear_btn = QPushButton("Clear Chat")
+        self.clear_btn.setFixedWidth(100)
+        self.clear_btn.setToolTip("Clear the chat history")
         self.clear_btn.clicked.connect(self._clear_chat)
-        ctrl_bar.addWidget(self.clear_btn)
+        tb_layout.addWidget(self.clear_btn)
 
-        self.cache_btn = QPushButton("⚡ Clear Cache")
-        self.cache_btn.setFixedWidth(115)
+        self.cache_btn = QPushButton("Clear Cache")
+        self.cache_btn.setFixedWidth(100)
+        self.cache_btn.setToolTip("Clear the persistent query cache")
         self.cache_btn.clicked.connect(self._clear_cache)
-        ctrl_bar.addWidget(self.cache_btn)
+        tb_layout.addWidget(self.cache_btn)
 
-        root.addLayout(ctrl_bar)
+        root.addWidget(toolbar)
 
         # ── Main splitter: chat | sources ─────────────────────────────────
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setHandleWidth(6)
 
-        # Chat display
+        # Left: chat display
         chat_frame = QFrame()
         chat_layout = QVBoxLayout(chat_frame)
         chat_layout.setContentsMargins(0, 0, 0, 0)
+        chat_layout.setSpacing(6)
 
         self.chat_display = QTextBrowser()
-        self.chat_display.setFont(QFont("Segoe UI", 12))
+        self.chat_display.setFont(QFont("-apple-system", 13))
         self.chat_display.setOpenExternalLinks(True)
+        self.chat_display.setStyleSheet(
+            f"QTextBrowser {{ background: {C['bg']}; border: none; padding: 6px; }}"
+        )
         chat_layout.addWidget(self.chat_display)
 
         # Input row
         input_row = QHBoxLayout()
+        input_row.setSpacing(8)
+
         self.query_input = QLineEdit()
-        self.query_input.setFont(QFont("Segoe UI", 12))
+        self.query_input.setFont(QFont("-apple-system", 13))
+        self.query_input.setFixedHeight(38)
         from config import Config
         self.query_input.setPlaceholderText(
             f"Ask anything about {Config.TOPIC_NAME} research…"
@@ -440,50 +807,75 @@ class ChatTab(QWidget):
         self.query_input.returnPressed.connect(self._send_query)
         input_row.addWidget(self.query_input, stretch=1)
 
-        self.send_btn = QPushButton("Ask ➤")
-        self.send_btn.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-        self.send_btn.setFixedWidth(80)
+        self.send_btn = QPushButton("Ask")
+        self.send_btn.setFont(QFont("-apple-system", 13, QFont.Weight.Bold))
+        self.send_btn.setFixedSize(70, 38)
         self.send_btn.clicked.connect(self._send_query)
         self.send_btn.setStyleSheet(
-            "QPushButton { background:#2980b9; color:white; border-radius:5px; padding:6px; }"
-            "QPushButton:hover { background:#3498db; }"
-            "QPushButton:disabled { background:#bdc3c7; }"
+            f"QPushButton {{ background:{C['accent']}; color:white; border:none; "
+            f"border-radius:6px; font-weight:bold; }}"
+            f"QPushButton:hover {{ background:{C['accent_dark']}; }}"
+            f"QPushButton:pressed {{ background:#1E40AF; }}"
+            f"QPushButton:disabled {{ background:{C['border']}; color:{C['text_muted']}; }}"
         )
         input_row.addWidget(self.send_btn)
         chat_layout.addLayout(input_row)
 
-        # Progress bar (hidden by default)
+        # Progress bar (indeterminate, hidden by default)
         self.progress = QProgressBar()
-        self.progress.setRange(0, 0)   # indeterminate
+        self.progress.setRange(0, 0)
         self.progress.setVisible(False)
-        self.progress.setFixedHeight(5)
+        self.progress.setFixedHeight(4)
+        self.progress.setTextVisible(False)
         chat_layout.addWidget(self.progress)
 
         splitter.addWidget(chat_frame)
 
-        # Sources panel
+        # Right: sources panel in a frame
+        sources_frame = QFrame()
+        sources_frame.setStyleSheet(
+            f"QFrame {{ background:{C['bg']}; border-left:1px solid {C['border']}; "
+            f"padding: 8px; }}"
+        )
+        sf_layout = QVBoxLayout(sources_frame)
+        sf_layout.setContentsMargins(8, 4, 4, 4)
         self.sources_panel = SourcesPanel()
-        splitter.addWidget(self.sources_panel)
-        splitter.setSizes([700, 300])
+        sf_layout.addWidget(self.sources_panel)
+        splitter.addWidget(sources_frame)
+        splitter.setSizes([720, 320])
 
         root.addWidget(splitter, stretch=1)
 
-        # ── Quick example questions ───────────────────────────────────────
+        # ── Example questions bar ─────────────────────────────────────────
+        ex_frame = QFrame()
+        ex_frame.setStyleSheet(
+            f"QFrame {{ background:{C['surface']}; border:1px solid {C['border']}; "
+            f"border-radius:8px; }}"
+        )
+        ex_layout = QHBoxLayout(ex_frame)
+        ex_layout.setContentsMargins(10, 6, 10, 6)
+        ex_layout.setSpacing(8)
+
+        hint = QLabel("Examples:")
+        hint.setStyleSheet(
+            f"color:{C['text_muted']};font-size:11px;font-weight:600;"
+        )
+        ex_layout.addWidget(hint)
+
         from config import Config
-        ex_bar = QHBoxLayout()
-        ex_bar.addWidget(QLabel("💡 Examples:"))
-        examples = Config.EXAMPLE_QUESTIONS[:3]
-        for ex in examples:
+        for ex in Config.EXAMPLE_QUESTIONS[:3]:
             btn = QPushButton(ex)
             btn.setStyleSheet(
-                "QPushButton { border:1px solid #bdc3c7; border-radius:4px; "
-                "padding:3px 8px; background:#ecf0f1; font-size:11px; }"
-                "QPushButton:hover { background:#d5dbdb; }"
+                f"QPushButton {{ color:{C['accent']}; background:{C['accent_light']}; "
+                f"border:1px solid {C['accent']}; border-radius:12px; "
+                f"padding:3px 10px; font-size:11px; }}"
+                f"QPushButton:hover {{ background:{C['accent']}; color:white; }}"
             )
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda _, t=ex: self._use_example(t))
-            ex_bar.addWidget(btn)
-        ex_bar.addStretch()
-        root.addLayout(ex_bar)
+            ex_layout.addWidget(btn)
+        ex_layout.addStretch()
+        root.addWidget(ex_frame)
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -502,7 +894,7 @@ class ChatTab(QWidget):
             from query_rag_v3 import _cache
             if _cache:
                 _cache.clear()
-                self.main_window.set_status("✅ Cache cleared.")
+                self.main_window.set_status("Cache cleared.")
             else:
                 self.main_window.set_status("Cache not enabled.")
         except Exception as e:
@@ -516,27 +908,34 @@ class ChatTab(QWidget):
 
         if role == "user":
             html = (
-                f'<div style="margin:8px 0; padding:8px 12px; '
-                f'background:#d6eaf8; border-radius:8px; '
-                f'font-size:13px;">'
-                f'<b style="color:#1a5276;">You</b><br>{text}</div>'
+                f'<div style="margin:6px 0 6px 40px; padding:10px 14px; '
+                f'background:{C["user_bg"]}; border-radius:12px 12px 4px 12px; '
+                f'border:1px solid #BFDBFE;">'
+                f'<span style="color:{C["text_muted"]};font-size:11px;'
+                f'font-weight:600;">You</span>'
+                f'<div style="color:{C["user_text"]};font-size:13px;'
+                f'margin-top:3px;">{text}</div></div>'
             )
         elif role == "assistant":
             html = (
-                f'<div style="margin:8px 0; padding:8px 12px; '
-                f'background:#eafaf1; border-radius:8px; '
-                f'font-size:13px;">'
-                f'<b style="color:#1e8449;">Assistant</b><br>{text}</div>'
+                f'<div style="margin:6px 40px 6px 0; padding:10px 14px; '
+                f'background:{C["bot_bg"]}; border-radius:12px 12px 12px 4px; '
+                f'border:1px solid #BBF7D0;">'
+                f'<span style="color:{C["text_muted"]};font-size:11px;'
+                f'font-weight:600;">Assistant</span>'
+                f'<div style="color:{C["bot_text"]};font-size:13px;'
+                f'margin-top:3px;">{text}</div></div>'
             )
         else:   # system / info
             html = (
-                f'<div style="margin:4px 0; padding:6px 10px; '
-                f'background:#fef9e7; border-radius:6px; '
-                f'font-size:11px; color:#7d6608;">{text}</div>'
+                f'<div style="margin:4px 20px; padding:6px 12px; '
+                f'background:{C["sys_bg"]}; border-radius:6px; '
+                f'border:1px solid #FDE68A; text-align:center;">'
+                f'<span style="color:{C["sys_text"]};font-size:11px;">{text}</span>'
+                f'</div>'
             )
 
-        self.chat_display.insertHtml(html)
-        # scroll to bottom
+        self.chat_display.insertHtml(html + "<br>")
         sb = self.chat_display.verticalScrollBar()
         sb.setValue(sb.maximum())
 
@@ -562,7 +961,7 @@ class ChatTab(QWidget):
         if year:
             self._append_message("system", f"Filtering for year {year}")
 
-        self.main_window.set_status("⏳ Thinking…")
+        self.main_window.set_status("Thinking…")
 
         self._worker = QueryWorker(query, year, mode)
         self._worker.finished.connect(self._on_result)
@@ -579,27 +978,24 @@ class ChatTab(QWidget):
         cache  = result.get("cache_hit", False)
         sub_qs = result.get("sub_questions", [])
 
-        # Build info footer
         info_parts = [
-            f"mode={mode}",
-            f"time={t}s",
-            "cache=HIT ⚡" if cache else "cache=MISS",
+            f"mode = {mode}",
+            f"time = {t}s",
+            "cache = HIT (instant)" if cache else "cache = MISS",
         ]
         if len(sub_qs) > 1:
-            info_parts.append(f"hops={len(sub_qs)}")
-        footer = " | ".join(info_parts)
+            info_parts.append(f"hops = {len(sub_qs)}")
+        footer = "  |  ".join(info_parts)
 
         self._append_message("assistant", answer)
         self._append_message("system", footer)
-
-        # Update sources panel
         self.sources_panel.update_sources(result.get("sources", []))
-        self.main_window.set_status(f"Done  |  {footer}")
+        self.main_window.set_status(footer)
 
     def _on_error(self, error_str: str):
         self.send_btn.setEnabled(True)
         self.progress.setVisible(False)
-        self._append_message("system", f"❌ Error: {error_str}")
+        self._append_message("system", f"Error: {error_str}")
         self.main_window.set_status(f"Error: {error_str[:80]}")
 
 
@@ -610,7 +1006,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         from config import Config
         self.setWindowTitle(f"{Config.TOPIC_NAME} Research Assistant  (RAG v3)")
-        self.setMinimumSize(1100, 720)
+        self.setMinimumSize(1100, 740)
         self._rag_ready = False
         self._build_menu()
         self._build_ui()
@@ -622,11 +1018,13 @@ class MainWindow(QMainWindow):
         menu = self.menuBar()
 
         file_menu = menu.addMenu("File")
-        settings_act = QAction("⚙  Settings…", self)
+        settings_act = QAction("Settings…", self)
+        settings_act.setShortcut("Ctrl+,")
         settings_act.triggered.connect(self._open_settings)
         file_menu.addAction(settings_act)
         file_menu.addSeparator()
         quit_act = QAction("Quit", self)
+        quit_act.setShortcut("Ctrl+Q")
         quit_act.triggered.connect(self.close)
         file_menu.addAction(quit_act)
 
@@ -639,28 +1037,42 @@ class MainWindow(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(12, 8, 12, 8)
+        layout.setSpacing(8)
 
-        # ── Header ────────────────────────────────────────────────────────
+        # ── Header band ───────────────────────────────────────────────────
+        header_frame = QFrame()
+        header_frame.setStyleSheet(
+            f"QFrame {{ background: {C['surface']}; border: 1px solid {C['border']}; "
+            f"border-radius: 10px; }}"
+        )
+        header_layout = QHBoxLayout(header_frame)
+        header_layout.setContentsMargins(14, 10, 14, 10)
+
         from config import Config
-        header = QLabel(f"🤖  {Config.TOPIC_NAME} Research Assistant")
-        header.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        header.setStyleSheet("color: #2c3e50; padding: 4px 0;")
-        layout.addWidget(header)
+        title = QLabel(f"{Config.TOPIC_NAME} Research Assistant")
+        title.setFont(QFont("-apple-system", 17, QFont.Weight.Bold))
+        title.setStyleSheet(f"color: {C['text']}; background: transparent;")
+        header_layout.addWidget(title)
+        header_layout.addStretch()
 
-        self.init_label = QLabel("⏳ Initialising RAG system…")
-        self.init_label.setStyleSheet("color: #e67e22; font-size: 12px;")
-        layout.addWidget(self.init_label)
+        self.init_label = QLabel("Initialising RAG system…")
+        self.init_label.setStyleSheet(
+            f"color: {C['warning']}; font-size: 12px; background: transparent;"
+        )
+        header_layout.addWidget(self.init_label)
+        layout.addWidget(header_frame)
 
-        # ── Tabs ─────────────────────────────────────────────────────────
+        # ── Tabs ──────────────────────────────────────────────────────────
         self.tabs = QTabWidget()
+        self.tabs.setDocumentMode(True)
         self.chat_tab   = ChatTab(self)
         self.status_tab = StatusTab()
-        self.tabs.addTab(self.chat_tab,   "💬 Chat")
-        self.tabs.addTab(self.status_tab, "📊 Status")
+        self.tabs.addTab(self.chat_tab,   "Chat")
+        self.tabs.addTab(self.status_tab, "Status")
         layout.addWidget(self.tabs, stretch=1)
 
-        # ── Status bar ───────────────────────────────────────────────────
+        # ── Status bar ────────────────────────────────────────────────────
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Initialising…")
@@ -676,31 +1088,36 @@ class MainWindow(QMainWindow):
 
     def _on_init_success(self, message: str):
         self._rag_ready = True
-        self.init_label.setText(f"✅ {message}")
-        self.init_label.setStyleSheet("color: #1e8449; font-size: 12px;")
+        self.init_label.setText(f"  {message}")
+        self.init_label.setStyleSheet(
+            f"color: {C['success']}; font-size: 12px; font-weight: 600; "
+            f"background: transparent;"
+        )
         self.chat_tab.send_btn.setEnabled(True)
         self.status_bar.showMessage(message)
         self.status_tab.refresh()
         from config import Config
         self.chat_tab._append_message(
             "system",
-            f"RAG system ready!  {message}<br>"
-            f"Ask me anything about {Config.TOPIC_NAME} research 👇"
+            f"RAG system ready! &nbsp; {message}<br>"
+            f"Ask me anything about <b>{Config.TOPIC_NAME}</b> research"
         )
 
     def _on_init_failure(self, error: str):
-        self.init_label.setText(f"❌ {error}")
-        self.init_label.setStyleSheet("color: #c0392b; font-size: 12px;")
+        self.init_label.setText(f"Init failed: {error[:60]}")
+        self.init_label.setStyleSheet(
+            f"color: {C['error']}; font-size: 12px; background: transparent;"
+        )
         self.status_bar.showMessage(f"Init failed: {error}")
         from config import Config
         self.chat_tab._append_message(
             "system",
-            f"❌ Initialisation failed: {error}<br><br>"
+            f"Initialisation failed: {error}<br><br>"
             "Possible fixes:<br>"
-            f"• Build the index first: <tt>python build_rag_index_v4.py</tt><br>"
-            "• If using OpenAI: set <tt>export OPENAI_API_KEY=sk-…</tt> and enable in Settings<br>"
-            "• If using LM Studio: ensure it is running on <tt>localhost:1234</tt><br>"
-            f"• Topic configured: <tt>{Config.TOPIC_NAME}</tt>"
+            f"&bull; Build the index first: <tt>python build_rag_index_v4.py</tt><br>"
+            "&bull; If using OpenAI: check API key in Settings (File > Settings)<br>"
+            "&bull; If using LM Studio: ensure server is running on localhost:1234<br>"
+            f"&bull; Topic: <tt>{Config.TOPIC_NAME}</tt>"
         )
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -714,8 +1131,8 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self, "Settings Saved",
                 "Settings applied.\n\n"
-                "⚠  Note: Changes take effect after restarting the app\n"
-                "    (or re-initialising via File › Settings).\n\n"
+                "Note: Changes to LLM provider or API key take effect\n"
+                "after restarting the app.\n\n"
                 "If you changed the embedding model, rebuild the index:\n"
                 "  python build_rag_index_v4.py --rebuild"
             )
@@ -726,18 +1143,18 @@ class MainWindow(QMainWindow):
         QMessageBox.about(
             self, "About",
             f"<b>{Config.TOPIC_NAME} Research Assistant — RAG v3</b><br><br>"
-            "A generic desktop application for querying arXiv research papers<br>"
+            "A desktop application for querying arXiv research papers<br>"
             f"on <i>{Config.TOPIC_NAME}</i> using Retrieval-Augmented Generation.<br><br>"
             f"<b>Topic:</b> {Config.TOPIC_NAME}<br>"
             f"<b>Description:</b> {Config.TOPIC_DESCRIPTION}<br><br>"
             "<b>Features:</b><br>"
-            "• Hybrid BM25 + Semantic search<br>"
-            "• HyDE hypothetical document embeddings<br>"
-            "• Cross-encoder re-ranking<br>"
-            "• Multi-hop chain-of-thought reasoning<br>"
-            "• Persistent SQLite query cache<br>"
-            "• OpenAI API & LM Studio support<br><br>"
-            "Built with PyQt6 · LangChain · ChromaDB · sentence-transformers"
+            "  Hybrid BM25 + Semantic search<br>"
+            "  HyDE hypothetical document embeddings<br>"
+            "  Cross-encoder re-ranking<br>"
+            "  Multi-hop chain-of-thought reasoning<br>"
+            "  Persistent SQLite query cache<br>"
+            "  OpenAI API and LM Studio support<br><br>"
+            "Built with PyQt6 · LangChain · ChromaDB"
         )
 
 
@@ -745,10 +1162,8 @@ class MainWindow(QMainWindow):
 
 def main():
     if not PYQT_AVAILABLE:
-        print("PyQt6 is not installed.")
-        print("Run: pip install PyQt6")
-        print()
-        print("Falling back to Tkinter desktop app…")
+        print("PyQt6 is not installed.  Run: pip install PyQt6")
+        print("Falling back to Tkinter…")
         _run_tkinter_fallback()
         return
 
@@ -757,52 +1172,21 @@ def main():
     app.setApplicationName(f"{Config.TOPIC_NAME} RAG")
     app.setApplicationVersion("3.0")
 
-    # ── Light application style ───────────────────────────────────────────
-    app.setStyleSheet("""
-        QMainWindow, QWidget { background: #f5f6fa; }
-        QGroupBox {
-            font-weight: bold;
-            border: 1px solid #bdc3c7;
-            border-radius: 6px;
-            margin-top: 10px;
-            padding-top: 8px;
-        }
-        QGroupBox::title {
-            subcontrol-origin: margin;
-            left: 10px;
-            padding: 0 4px;
-            color: #2c3e50;
-        }
-        QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            padding: 4px 6px;
-            background: white;
-        }
-        QLineEdit:focus, QComboBox:focus {
-            border-color: #2980b9;
-        }
-        QTextBrowser, QTextEdit {
-            border: 1px solid #dfe6e9;
-            border-radius: 4px;
-            background: white;
-        }
-        QTabWidget::pane {
-            border: 1px solid #dfe6e9;
-            border-radius: 4px;
-        }
-        QTabBar::tab {
-            padding: 6px 18px;
-            background: #ecf0f1;
-            border: 1px solid #dfe6e9;
-        }
-        QTabBar::tab:selected {
-            background: white;
-            font-weight: bold;
-        }
-        QStatusBar { background: #2c3e50; color: white; padding: 2px 6px; }
-        QProgressBar::chunk { background: #2980b9; }
-    """)
+    # Force light-mode palette so text always reads dark on light backgrounds
+    palette = QPalette()
+    palette.setColor(QPalette.ColorRole.Window,          QColor(C["bg"]))
+    palette.setColor(QPalette.ColorRole.WindowText,      QColor(C["text"]))
+    palette.setColor(QPalette.ColorRole.Base,            QColor(C["surface"]))
+    palette.setColor(QPalette.ColorRole.AlternateBase,   QColor(C["bg"]))
+    palette.setColor(QPalette.ColorRole.Text,            QColor(C["text"]))
+    palette.setColor(QPalette.ColorRole.ButtonText,      QColor(C["text"]))
+    palette.setColor(QPalette.ColorRole.Button,          QColor(C["surface"]))
+    palette.setColor(QPalette.ColorRole.Highlight,       QColor(C["accent"]))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#FFFFFF"))
+    palette.setColor(QPalette.ColorRole.PlaceholderText, QColor(C["text_muted"]))
+    app.setPalette(palette)
+
+    app.setStyleSheet(APP_STYLESHEET)
 
     window = MainWindow()
     window.show()
@@ -847,25 +1231,23 @@ def _run_tkinter_fallback():
 
             self.chat = scrolledtext.ScrolledText(
                 self.root, wrap=tk.WORD, state=tk.DISABLED, height=28,
-                font=("Segoe UI", 11)
+                font=("Helvetica", 11)
             )
             self.chat.pack(fill=tk.BOTH, expand=True, padx=10, pady=4)
 
             bottom = ttk.Frame(self.root)
             bottom.pack(fill=tk.X, padx=10, pady=6)
-            self.entry = ttk.Entry(bottom, font=("Segoe UI", 11))
+            self.entry = ttk.Entry(bottom, font=("Helvetica", 11))
             self.entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
             self.entry.bind("<Return>", lambda _e: self._send())
-            self.btn = ttk.Button(bottom, text="Ask ➤", command=self._send)
+            self.btn = ttk.Button(bottom, text="Ask", command=self._send)
             self.btn.pack(side=tk.LEFT, padx=6)
 
         def _init_rag(self):
             from query_rag_v3 import initialize_rag
             ok = initialize_rag()
-            msg = "✅ RAG ready." if ok else "❌ Init failed — see console."
+            msg = "RAG ready." if ok else "Init failed — see console."
             self._append(f"System: {msg}\n")
-            if ok:
-                self.btn.configure(state=tk.NORMAL)
 
         def _send(self):
             q = self.entry.get().strip()
